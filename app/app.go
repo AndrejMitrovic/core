@@ -457,6 +457,7 @@ func NewTerraApp(
 		appCodec,
 		keys[tokenmoduletypes.StoreKey],
 		keys[tokenmoduletypes.MemStoreKey],
+		app.OracleKeeper,
 	)
 
 	/****  Module Options ****/

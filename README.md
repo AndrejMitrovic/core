@@ -1,4 +1,22 @@
+## What this contains
+
+This adds a very rudimentary token "wallet" module. The user signs a transaction
+containing the amount of tokens they want to create / update in microLuna
+denomination, and then the module converts it to microKRW via the Oracle module.
+
+I did not add any other useful functionality such as sending tokens from one
+account to another, as I've ran out of time due to:
+- Researching & reading Terra / Cosmos SDK / Starport documentation
+- Refreshing my memory about how Golang works
+- Trying to tame Starport to make it do what I wanted. :)
+- Resolving version differences, due to Starport master targeting an older
+  Cosmos SDK.
+
+I would have loved adding more features (+ unittests), but I needed more time.
+
 ## How to run
+
+I've used Go `v1.16.6` on linux.
 
 ### Starting terra-core:
 

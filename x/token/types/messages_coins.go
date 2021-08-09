@@ -1,6 +1,8 @@
 package types
 
 import (
+	"strconv"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
@@ -41,10 +43,22 @@ func (msg *MsgCreateCoins) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
+// amount must be a non-negative number
+func ValidateAmount(input string) bool {
+	if amount, err := strconv.ParseUint(input, 10, 64); err == nil {
+		return true
+	} else {
+		return false
+	}
+}
+
 func (msg *MsgCreateCoins) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
+	}
+	if !ValidateAmount(msg.Amount) {
+		return sdkerrors.Wrapf(ErrInvalidAmount, "Value must be a non-negative number (%v)", msg.Amount)
 	}
 	return nil
 }
@@ -89,6 +103,9 @@ func (msg *MsgUpdateCoins) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
+	}
+	if !ValidateAmount(msg.Amount) {
+		return sdkerrors.Wrapf(ErrInvalidAmount, "Value must be a non-negative number (%v)", msg.Amount)
 	}
 	return nil
 }

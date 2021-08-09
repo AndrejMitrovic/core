@@ -8,6 +8,6 @@ import (
 
 // x/token module sentinel errors
 var (
-	ErrSample = sdkerrors.Register(ModuleName, 1100, "sample error")
+	ErrInvalidAmount = sdkerrors.Register(ModuleName, 1100, "Invalid amount")
 	// this line is used by starport scaffolding # ibc/errors
 )

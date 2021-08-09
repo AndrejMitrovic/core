@@ -2,6 +2,8 @@ package keeper
 
 import (
 	"context"
+	"strconv"
+	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -50,10 +52,22 @@ func (k msgServer) UpdateCoins(goCtx context.Context, msg *types.MsgUpdateCoins)
 		return nil, sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "incorrect owner")
 	}
 
+	// panics on invalid input as validation should have already been done
+	getValidAmount := func (input string) uint64 {
+		if amount, err := strconv.ParseUint(msg.Amount, 10, 64); err == nil {
+			return amount
+		} else {
+			panic(fmt.Sprintf("Value not an integer: %v", msg.Amount))
+		}
+	}
+
+	// add previous coins
+	totalAmount := getValidAmount(msg.Amount) + getValidAmount(valFound.Amount)
+
 	var coins = types.Coins{
 		Creator: msg.Creator,
 		User:    msg.User,
-		Amount:  msg.Amount,
+		Amount:  strconv.FormatUint(totalAmount, 10),
 	}
 
 	k.SetCoins(ctx, coins)

@@ -93,6 +93,10 @@ import (
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
+	tokenmodule "github.com/terra-money/core/x/token"
+	tokenmodulekeeper "github.com/terra-money/core/x/token/keeper"
+	tokenmoduletypes "github.com/terra-money/core/x/token/types"
+
 	terraappparams "github.com/terra-money/core/app/params"
 
 	customauth "github.com/terra-money/core/custom/auth"
@@ -179,6 +183,7 @@ var (
 		market.AppModuleBasic{},
 		treasury.AppModuleBasic{},
 		wasm.AppModuleBasic{},
+		tokenmodule.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -251,6 +256,8 @@ type TerraApp struct { // nolint: golint
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 
+	tokenKeeper tokenmodulekeeper.Keeper
+
 	// the module manager
 	mm *module.Manager
 
@@ -292,6 +299,7 @@ func NewTerraApp(
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
 		oracletypes.StoreKey, markettypes.StoreKey, treasurytypes.StoreKey,
 		wasmtypes.StoreKey, authzkeeper.StoreKey, feegrant.StoreKey,
+		tokenmoduletypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -445,6 +453,12 @@ func NewTerraApp(
 		&stakingKeeper, govRouter,
 	)
 
+	app.tokenKeeper = *tokenmodulekeeper.NewKeeper(
+		appCodec,
+		keys[tokenmoduletypes.StoreKey],
+		keys[tokenmoduletypes.MemStoreKey],
+	)
+
 	/****  Module Options ****/
 	var skipGenesisInvariants = cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
 
@@ -475,6 +489,7 @@ func NewTerraApp(
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		treasury.NewAppModule(appCodec, app.TreasuryKeeper),
 		wasm.NewAppModule(appCodec, app.WasmKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
+		tokenmodule.NewAppModule(appCodec, app.tokenKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -511,6 +526,7 @@ func NewTerraApp(
 		ibchost.ModuleName, genutiltypes.ModuleName,
 		evidencetypes.ModuleName, ibctransfertypes.ModuleName,
 		feegrant.ModuleName,
+		tokenmoduletypes.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
@@ -762,6 +778,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(oracletypes.ModuleName)
 	paramsKeeper.Subspace(treasurytypes.ModuleName)
 	paramsKeeper.Subspace(wasmtypes.ModuleName)
+	paramsKeeper.Subspace(tokenmoduletypes.ModuleName)
 
 	return paramsKeeper
 }

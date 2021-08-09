@@ -9,7 +9,7 @@ import (
 // SetCoins set a specific coins in the store from its index
 func (k Keeper) SetCoins(ctx sdk.Context, coins types.Coins) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.CoinsKeyPrefix))
-	b := k.cdc.MustMarshalBinaryBare(&coins)
+	b := k.cdc.MustMarshal(&coins)
 	store.Set(types.CoinsKey(
 		coins.User,
 	), b)
@@ -30,7 +30,7 @@ func (k Keeper) GetCoins(
 		return val, false
 	}
 
-	k.cdc.MustUnmarshalBinaryBare(b, &val)
+	k.cdc.MustUnmarshal(b, &val)
 	return val, true
 }
 
@@ -55,7 +55,7 @@ func (k Keeper) GetAllCoins(ctx sdk.Context) (list []types.Coins) {
 
 	for ; iterator.Valid(); iterator.Next() {
 		var val types.Coins
-		k.cdc.MustUnmarshalBinaryBare(iterator.Value(), &val)
+		k.cdc.MustUnmarshal(iterator.Value(), &val)
 		list = append(list, val)
 	}
 

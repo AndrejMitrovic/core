@@ -24,7 +24,7 @@ func (k Keeper) CoinsAll(c context.Context, req *types.QueryAllCoinsRequest) (*t
 
 	pageRes, err := query.Paginate(coinsStore, req.Pagination, func(key []byte, value []byte) error {
 		var coins types.Coins
-		if err := k.cdc.UnmarshalBinaryBare(value, &coins); err != nil {
+		if err := k.cdc.Unmarshal(value, &coins); err != nil {
 			return err
 		}
 

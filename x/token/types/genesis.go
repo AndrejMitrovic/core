@@ -1,8 +1,8 @@
 package types
 
 import (
-// this line is used by starport scaffolding # genesis/types/import
-// this line is used by starport scaffolding # ibc/genesistype/import
+	"fmt"
+	// this line is used by starport scaffolding # ibc/genesistype/import
 )
 
 // DefaultIndex is the default capability global index
@@ -13,6 +13,7 @@ func DefaultGenesis() *GenesisState {
 	return &GenesisState{
 		// this line is used by starport scaffolding # ibc/genesistype/default
 		// this line is used by starport scaffolding # genesis/types/default
+		CoinsList: []*Coins{},
 	}
 }
 
@@ -22,6 +23,16 @@ func (gs GenesisState) Validate() error {
 	// this line is used by starport scaffolding # ibc/genesistype/validate
 
 	// this line is used by starport scaffolding # genesis/types/validate
+	// Check for duplicated index in coins
+	coinsIndexMap := make(map[string]struct{})
+
+	for _, elem := range gs.CoinsList {
+		index := string(CoinsKey(elem.User))
+		if _, ok := coinsIndexMap[index]; ok {
+			return fmt.Errorf("duplicated index for coins")
+		}
+		coinsIndexMap[index] = struct{}{}
+	}
 
 	return nil
 }
